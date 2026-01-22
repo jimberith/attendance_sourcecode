@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ATTENDIFY</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- OFFLINE SCREEN -->
+  <div id="offlineScreen" class="offline hidden">
+    <div class="offline-card">
+      <div class="offline-icon">📡</div>
+      <h2>No Internet</h2>
+      <p>ATTENDIFY requires internet connection.</p>
+      <div class="offline-loader"></div>
+    </div>
+  </div>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loadingOverlay" class="loading hidden">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <h3>Loading...</h3>
+    </div>
+  </div>
+
+  <!-- AUTH -->
+  <section id="authSection" class="auth-page">
+    <div class="auth-box">
+      <div class="auth-left">
+        <h1>ATTENDIFY</h1>
+      </div>
+
+      <div class="auth-right">
+        <h2>Login / Signup</h2>
+
+        <!-- SIGNUP -->
+        <label>Name</label>
+        <input type="text" id="name" placeholder="Full Name"/>
+
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Email"/>
+
+        <label>Roll Number</label>
+        <input type="text" id="rollNumber" placeholder="Roll Number"/>
+
+        <!-- LOGIN (Name / Email / Roll Number) -->
+        <label>Login ID</label>
+        <input type="text" id="loginId" placeholder="Name / Email / Roll Number"/>
+
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Password"/>
+
+        <div class="auth-actions">
+          <button class="btn btn-main" id="signupBtn">Signup</button>
+          <button class="btn btn-alt" id="loginBtn">Login</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section id="homeSection" class="app hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="logo">AT</div>
+        <div>
+          <h3>ATTENDIFY</h3>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-page="dashboardPage">🏠 Dashboard</button>
+        <button class="nav-item" data-page="attendancePage">📅 Attendance</button>
+        <button class="nav-item" data-page="marksPage">📊 Marks</button>
+        <button class="nav-item" data-page="profilePage">👤 Profile</button>
+
+        <div id="adminNavBlock" class="admin-only hidden">
+          <p class="nav-section">Admin</p>
+          <button class="nav-item" data-page="adminUsersPage">👥 Users</button>
+          <button class="nav-item" data-page="adminSetupPage">⚙️ Setup</button>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-danger" id="logoutBtn">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn" id="menuBtn">☰</button>
+
+        <div class="topbar-info">
+          <h2 id="welcomeText">Welcome</h2>
+          <p class="small muted" id="roleText">Role</p>
+        </div>
+
+        <div class="topbar-right">
+          <div class="pill" id="enrolledPill">Not Enrolled</div>
+        </div>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section class="page" id="dashboardPage">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="muted small">Attendance Entries</p>
+            <h3 id="attStat">0</h3>
+          </div>
+          <div class="stat-card">
+            <p class="muted small">Subjects</p>
+            <h3 id="subStat">0</h3>
+          </div>
+          <div class="stat-card">
+            <p class="muted small">Marks</p>
+            <h3 id="marksStat">0</h3>
+          </div>
+        </div>
+      </section>
+
+      <!-- ATTENDANCE -->
+      <section class="page hidden" id="attendancePage">
+        <div class="card fancy-card">
+          <h3>Attendance</h3>
+          <div id="attendanceView" class="box"></div>
+        </div>
+
+        <div class="card fancy-card student-only hidden" id="studentEnrollCard">
+          <h3>Enroll</h3>
+          <select id="studentClassSelect"></select>
+          <button class="btn btn-main" id="enrollBtn">Enroll</button>
+        </div>
+
+        <div class="card fancy-card admin-only hidden" id="adminAttendanceCard">
+          <h3>Mark Attendance</h3>
+          <select id="attendanceStudentSelect"></select>
+          <select id="attendanceClassSelect"></select>
+
+          <select id="attendanceStatus">
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            <option value="On Duty (O/D)">On Duty (O/D)</option>
+            <option value="Leave">Leave</option>
+          </select>
+
+          <button class="btn btn-alt" id="saveAttendanceBtn">Save</button>
+        </div>
+      </section>
+
+      <!-- MARKS -->
+      <section class="page hidden" id="marksPage">
+        <div class="card fancy-card">
+          <h3>Marks</h3>
+          <div id="marksView" class="box"></div>
+        </div>
+
+        <div class="card fancy-card admin-only hidden" id="adminMarksCard">
+          <h3>Update Marks</h3>
+          <select id="marksStudentSelect"></select>
+          <select id="subjectSelect"></select>
+          <input type="number" id="marksValue" placeholder="0-100"/>
+          <button class="btn btn-alt" id="saveMarksBtn">Save</button>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="page hidden" id="profilePage">
+        <div class="card fancy-card">
+          <h3>Profile</h3>
+
+          <div class="profile-grid">
+            <!-- Left side profile editing -->
+            <div class="profile-block">
+              <div class="pic-row">
+                <div class="pic-wrap">
+                  <img id="profilePicPreview" class="profile-pic" alt="Profile Picture"/>
+                  <div class="pic-fallback" id="picFallback">👤</div>
+                </div>
+                <div class="pic-actions">
+                  <label class="file-btn">
+                    Upload Photo
+                    <input type="file" id="profilePicInput" accept="image/*"/>
+                  </label>
+                </div>
+              </div>
+
+              <input type="text" id="editName" placeholder="Name"/>
+              <input type="text" id="editRoll" placeholder="Roll Number"/>
+
+              <select id="genderSelect">
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+
+              <input type="text" id="phoneInput" placeholder="Phone Number"/>
+              <input type="date" id="dobInput" placeholder="Date of Birth"/>
+              <textarea id="addressInput" placeholder="Address"></textarea>
+
+              <input type="password" id="editPassword" placeholder="New Password"/>
+              <button class="btn btn-main" id="saveProfileBtn">Update</button>
+
+              <div id="profileInfoView" class="box" style="margin-top:10px;"></div>
+            </div>
+
+            <!-- Right side calendar -->
+            <div class="profile-block">
+              <h4>Attendance Calendar</h4>
+
+              <div class="range-row admin-only hidden" id="adminRangeBox">
+                <div>
+                  <label class="tiny-label">From</label>
+                  <input type="date" id="rangeStart"/>
+                </div>
+                <div>
+                  <label class="tiny-label">To</label>
+                  <input type="date" id="rangeEnd"/>
+                </div>
+                <button class="btn btn-alt" id="saveRangeBtn">Save Range</button>
+              </div>
+
+              <div class="calendar-wrap">
+                <input type="month" id="monthPicker"/>
+                <div id="calendarGrid" class="calendar-grid"></div>
+              </div>
+
+              <div class="card-mini">
+                <p class="muted small">Attendance % (Range)</p>
+                <h3 id="attPercent">0%</h3>
+                <p class="muted small" id="attRangeText"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMIN USERS -->
+      <section class="page hidden" id="adminUsersPage">
+        <div class="card fancy-card">
+          <h3>Users</h3>
+          <input type="text" id="newUserName" placeholder="Student Name"/>
+          <input type="text" id="newUserRoll" placeholder="Student Roll Number"/>
+          <input type="email" id="newUserEmail" placeholder="Student Email"/>
+          <input type="password" id="newUserPass" placeholder="Student Password"/>
+          <button class="btn btn-main" id="addUserBtn">Add Student</button>
+
+          <div id="allUsersView" class="box" style="margin-top:10px;"></div>
+        </div>
+      </section>
+
+      <!-- ADMIN SETUP -->
+      <section class="page hidden" id="adminSetupPage">
+        <div class="card fancy-card">
+          <h3>Setup</h3>
+          <input type="text" id="newClassName" placeholder="Class Name"/>
+          <button class="btn btn-main" id="addClassBtn">Add Class</button>
+
+          <input type="text" id="newSubjectName" placeholder="Subject Name"/>
+          <button class="btn btn-alt" id="addSubjectBtn">Add Subject</button>
+
+          <div id="subjectsView" class="box" style="margin-top:10px;"></div>
+        </div>
+      </section>
+
+    </main>
+  </section>
+
+  <!-- POPUP -->
+  <div id="popupOverlay" class="popup-overlay hidden">
+    <div class="popup-box">
+      <h3 id="popupTitle"></h3>
+      <p id="popupMessage"></p>
+      <button id="popupOkBtn" class="btn btn-main">OK</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
