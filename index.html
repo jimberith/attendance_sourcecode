@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <!-- LOADING OVERLAY -->
+  <!-- LOADING -->
   <div id="loadingOverlay" class="loading hidden">
     <div class="loading-card">
       <div class="spinner"></div>
@@ -31,32 +31,44 @@
     <div class="auth-box">
       <div class="auth-left">
         <h1>ATTENDIFY</h1>
+        <p class="muted" style="margin-top:8px;">Attendance + Marks + Monitoring</p>
       </div>
 
       <div class="auth-right">
-        <h2>Login / Signup</h2>
+        <div class="auth-header">
+          <h2 id="authTitle">Login</h2>
+          <p class="muted small">Use your Roll / Email / Name</p>
+        </div>
 
-        <!-- SIGNUP -->
-        <label>Name</label>
-        <input type="text" id="name" placeholder="Full Name"/>
+        <div class="auth-tabs">
+          <button class="tab-btn active" id="showLoginTab">Login</button>
+          <button class="tab-btn" id="showSignupTab">Signup</button>
+        </div>
 
-        <label>Email</label>
-        <input type="email" id="email" placeholder="Email"/>
+        <div id="signupFields" class="hidden">
+          <label>Name</label>
+          <input type="text" id="name" placeholder="Full Name"/>
 
-        <label>Roll Number</label>
-        <input type="text" id="rollNumber" placeholder="Roll Number"/>
+          <label>Email</label>
+          <input type="email" id="email" placeholder="Email"/>
 
-        <!-- LOGIN (Name / Email / Roll Number) -->
-        <label>Login ID</label>
-        <input type="text" id="loginId" placeholder="Name / Email / Roll Number"/>
+          <label>Roll Number</label>
+          <input type="text" id="rollNumber" placeholder="Roll Number"/>
+        </div>
+
+        <div id="loginFields">
+          <label>Login ID</label>
+          <input type="text" id="loginId" placeholder="Name / Email / Roll Number"/>
+        </div>
 
         <label>Password</label>
         <input type="password" id="password" placeholder="Password"/>
 
-        <div class="auth-actions">
-          <button class="btn btn-main" id="signupBtn">Signup</button>
-          <button class="btn btn-alt" id="loginBtn">Login</button>
-        </div>
+        <button class="btn btn-main" id="submitAuthBtn">Login</button>
+
+        <p class="muted small" style="margin-top:10px;">
+          First account created becomes <b>OWNER</b>.
+        </p>
       </div>
     </div>
   </section>
@@ -68,6 +80,7 @@
         <div class="logo">AT</div>
         <div>
           <h3>ATTENDIFY</h3>
+          <p class="muted small">Smart Attendance</p>
         </div>
       </div>
 
@@ -78,7 +91,7 @@
         <button class="nav-item" data-page="profilePage">👤 Profile</button>
 
         <div id="adminNavBlock" class="admin-only hidden">
-          <p class="nav-section">Admin</p>
+          <p class="nav-section">Admin Tools</p>
           <button class="nav-item" data-page="adminUsersPage">👥 Users</button>
           <button class="nav-item" data-page="adminSetupPage">⚙️ Setup</button>
         </div>
@@ -119,34 +132,53 @@
             <h3 id="marksStat">0</h3>
           </div>
         </div>
+
+        <div class="card fancy-card">
+          <h3>Quick Info</h3>
+          <div class="box" id="dashboardInfoBox">
+            Welcome to <b>ATTENDIFY</b>. Use Attendance tab to view or mark attendance.
+          </div>
+        </div>
       </section>
 
       <!-- ATTENDANCE -->
       <section class="page hidden" id="attendancePage">
         <div class="card fancy-card">
-          <h3>Attendance</h3>
+          <h3>Attendance Records</h3>
           <div id="attendanceView" class="box"></div>
         </div>
 
+        <!-- STUDENT ENROLL -->
         <div class="card fancy-card student-only hidden" id="studentEnrollCard">
-          <h3>Enroll</h3>
+          <h3>Enroll in Class</h3>
           <select id="studentClassSelect"></select>
           <button class="btn btn-main" id="enrollBtn">Enroll</button>
         </div>
 
+        <!-- OWNER/STAFF ATTENDANCE -->
         <div class="card fancy-card admin-only hidden" id="adminAttendanceCard">
-          <h3>Mark Attendance</h3>
-          <select id="attendanceStudentSelect"></select>
-          <select id="attendanceClassSelect"></select>
+          <h3>Mark Attendance (Tap to Cycle)</h3>
 
-          <select id="attendanceStatus">
-            <option value="Present">Present</option>
-            <option value="Absent">Absent</option>
-            <option value="On Duty (O/D)">On Duty (O/D)</option>
-            <option value="Leave">Leave</option>
-          </select>
+          <div class="grid-2">
+            <div>
+              <label class="tiny-label">Class</label>
+              <select id="adminAttendanceClassSelect"></select>
+            </div>
 
-          <button class="btn btn-alt" id="saveAttendanceBtn">Save</button>
+            <div>
+              <label class="tiny-label">Date</label>
+              <input type="date" id="adminAttendanceDate"/>
+            </div>
+          </div>
+
+          <div id="adminAttendanceButtons" class="student-grid"></div>
+
+          <div class="legend">
+            <span class="legend-pill present">Present</span>
+            <span class="legend-pill absent">Absent</span>
+            <span class="legend-pill od">O/D</span>
+            <span class="legend-pill leave">Leave</span>
+          </div>
         </div>
       </section>
 
@@ -172,7 +204,6 @@
           <h3>Profile</h3>
 
           <div class="profile-grid">
-            <!-- Left side profile editing -->
             <div class="profile-block">
               <div class="pic-row">
                 <div class="pic-wrap">
@@ -187,49 +218,43 @@
                 </div>
               </div>
 
-              <input type="text" id="editName" placeholder="Name"/>
-              <input type="text" id="editRoll" placeholder="Roll Number"/>
+              <div class="grid-2">
+                <input type="text" id="editName" placeholder="Name"/>
+                <input type="text" id="editRoll" placeholder="Roll Number"/>
+              </div>
 
-              <select id="genderSelect">
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
+              <div class="grid-2">
+                <select id="genderSelect">
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
 
-              <input type="text" id="phoneInput" placeholder="Phone Number"/>
-              <input type="date" id="dobInput" placeholder="Date of Birth"/>
+                <input type="text" id="phoneInput" placeholder="Phone Number"/>
+              </div>
+
+              <div class="grid-2">
+                <input type="date" id="dobInput"/>
+                <input type="password" id="editPassword" placeholder="New Password"/>
+              </div>
+
               <textarea id="addressInput" placeholder="Address"></textarea>
 
-              <input type="password" id="editPassword" placeholder="New Password"/>
-              <button class="btn btn-main" id="saveProfileBtn">Update</button>
+              <button class="btn btn-main" id="saveProfileBtn">Update Profile</button>
 
               <div id="profileInfoView" class="box" style="margin-top:10px;"></div>
             </div>
 
-            <!-- Right side calendar -->
             <div class="profile-block">
               <h4>Attendance Calendar</h4>
-
-              <div class="range-row admin-only hidden" id="adminRangeBox">
-                <div>
-                  <label class="tiny-label">From</label>
-                  <input type="date" id="rangeStart"/>
-                </div>
-                <div>
-                  <label class="tiny-label">To</label>
-                  <input type="date" id="rangeEnd"/>
-                </div>
-                <button class="btn btn-alt" id="saveRangeBtn">Save Range</button>
-              </div>
-
               <div class="calendar-wrap">
                 <input type="month" id="monthPicker"/>
                 <div id="calendarGrid" class="calendar-grid"></div>
               </div>
 
               <div class="card-mini">
-                <p class="muted small">Attendance % (Range)</p>
+                <p class="muted small">Attendance %</p>
                 <h3 id="attPercent">0%</h3>
                 <p class="muted small" id="attRangeText"></p>
               </div>
@@ -241,14 +266,33 @@
       <!-- ADMIN USERS -->
       <section class="page hidden" id="adminUsersPage">
         <div class="card fancy-card">
-          <h3>Users</h3>
-          <input type="text" id="newUserName" placeholder="Student Name"/>
-          <input type="text" id="newUserRoll" placeholder="Student Roll Number"/>
-          <input type="email" id="newUserEmail" placeholder="Student Email"/>
-          <input type="password" id="newUserPass" placeholder="Student Password"/>
-          <button class="btn btn-main" id="addUserBtn">Add Student</button>
+          <h3>Users (Admin Control)</h3>
 
-          <div id="allUsersView" class="box" style="margin-top:10px;"></div>
+          <div class="card-mini">
+            <h4>Add Student</h4>
+            <div class="grid-4">
+              <input type="text" id="newUserName" placeholder="Name"/>
+              <input type="text" id="newUserRoll" placeholder="Roll"/>
+              <input type="email" id="newUserEmail" placeholder="Email"/>
+              <input type="password" id="newUserPass" placeholder="Password"/>
+            </div>
+            <button class="btn btn-main" id="addUserBtn">Add Student</button>
+          </div>
+
+          <div class="card-mini">
+            <h4>All Users</h4>
+            <div class="grid-2" style="margin-top:8px;">
+              <input type="text" id="userSearch" placeholder="Search by name / roll / class"/>
+              <select id="roleFilter">
+                <option value="">All Roles</option>
+                <option value="owner">Owner</option>
+                <option value="staff">Staff</option>
+                <option value="student">Student</option>
+              </select>
+            </div>
+
+            <div id="allUsersView" class="users-list"></div>
+          </div>
         </div>
       </section>
 
@@ -256,11 +300,20 @@
       <section class="page hidden" id="adminSetupPage">
         <div class="card fancy-card">
           <h3>Setup</h3>
-          <input type="text" id="newClassName" placeholder="Class Name"/>
-          <button class="btn btn-main" id="addClassBtn">Add Class</button>
 
-          <input type="text" id="newSubjectName" placeholder="Subject Name"/>
-          <button class="btn btn-alt" id="addSubjectBtn">Add Subject</button>
+          <div class="grid-2">
+            <div class="card-mini">
+              <h4>Add Class</h4>
+              <input type="text" id="newClassName" placeholder="Class Name"/>
+              <button class="btn btn-main" id="addClassBtn">Add Class</button>
+            </div>
+
+            <div class="card-mini">
+              <h4>Add Subject</h4>
+              <input type="text" id="newSubjectName" placeholder="Subject Name"/>
+              <button class="btn btn-alt" id="addSubjectBtn">Add Subject</button>
+            </div>
+          </div>
 
           <div id="subjectsView" class="box" style="margin-top:10px;"></div>
         </div>
