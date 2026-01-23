@@ -1,6 +1,5 @@
 /* =========================
-   ATTENDIFY - CUSTOM UI CSS (FULL)
-   Works with your exact HTML
+   ATTENDIFY - FULL CSS
    ========================= */
 
 *{
@@ -20,13 +19,7 @@ body{
 .hidden{display:none!important;}
 .muted{color:#6b7280;}
 .small{font-size:.85rem;}
-.tiny-label{
-  font-size:.75rem;
-  color:#6b7280;
-  font-weight:700;
-  margin-bottom:4px;
-  display:block;
-}
+.tiny-label{font-size:.75rem;color:#6b7280;font-weight:700;margin-bottom:4px;display:block;}
 
 .page{
   opacity:1;
@@ -39,9 +32,7 @@ body{
   pointer-events:none;
 }
 
-/* =========================
-   OFFLINE + LOADING
-   ========================= */
+/* ================ OFFLINE + LOADING ================ */
 .offline{
   position:fixed;
   inset:0;
@@ -52,7 +43,6 @@ body{
   background:radial-gradient(circle at top,#111827,#000);
   padding:18px;
 }
-
 .offline-card{
   width:100%;
   max-width:420px;
@@ -65,12 +55,7 @@ body{
   box-shadow:0 18px 40px rgba(0,0,0,.4);
   color:white;
 }
-
-.offline-icon{
-  font-size:2.4rem;
-  margin-bottom:6px;
-}
-
+.offline-icon{font-size:2.4rem;margin-bottom:6px;}
 .offline-loader{
   width:100%;
   height:8px;
@@ -79,7 +64,6 @@ body{
   background:rgba(255,255,255,.15);
   overflow:hidden;
 }
-
 .offline-loader::after{
   content:"";
   display:block;
@@ -88,7 +72,6 @@ body{
   background:linear-gradient(90deg,#22c55e,#3b82f6,#a855f7);
   animation:moveBar 1.1s infinite ease-in-out;
 }
-
 @keyframes moveBar{
   0%{transform:translateX(-120%)}
   100%{transform:translateX(320%)}
@@ -104,7 +87,6 @@ body{
   justify-content:center;
   padding:18px;
 }
-
 .loading-card{
   width:100%;
   max-width:260px;
@@ -115,7 +97,6 @@ body{
   box-shadow:0 18px 40px rgba(0,0,0,.25);
   border:1px solid rgba(255,255,255,.7);
 }
-
 .spinner{
   width:44px;
   height:44px;
@@ -125,21 +106,15 @@ body{
   margin:0 auto 10px auto;
   animation:spin .7s linear infinite;
 }
+@keyframes spin{to{transform:rotate(360deg)}}
 
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
-
-/* =========================
-   AUTH PAGE
-   ========================= */
+/* ================ AUTH ================ */
 .auth-page{
   min-height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
 }
-
 .auth-box{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -147,11 +122,9 @@ body{
   width:100%;
   max-width:980px;
 }
-
 @media(max-width:900px){
   .auth-box{grid-template-columns:1fr;}
 }
-
 .auth-left{
   background:rgba(255,255,255,.16);
   border:1px solid rgba(255,255,255,.25);
@@ -163,26 +136,18 @@ body{
   flex-direction:column;
   justify-content:center;
 }
-
 .auth-left h1{
   font-size:2.4rem;
   color:white;
   font-weight:900;
   letter-spacing:.6px;
 }
-
 .auth-right{
   background:white;
   padding:22px;
   border-radius:22px;
   box-shadow:0 10px 28px rgba(0,0,0,.14);
 }
-
-.auth-header h2{
-  color:#1e40af;
-  font-weight:900;
-}
-
 .auth-right label{
   display:block;
   margin-top:10px;
@@ -201,24 +166,16 @@ input, select, textarea{
   background:white;
   transition:.2s;
 }
-
 input:focus, select:focus, textarea:focus{
   border-color:#3b82f6;
   box-shadow:0 0 0 4px rgba(59,130,246,.15);
 }
 
-textarea{
-  min-height:90px;
-  resize:none;
-}
-
-/* Auth tabs */
 .auth-tabs{
   display:flex;
   gap:10px;
   margin:12px 0;
 }
-
 .tab-btn{
   flex:1;
   border:none;
@@ -227,19 +184,13 @@ textarea{
   font-weight:900;
   cursor:pointer;
   background:#f3f4f6;
-  transition:.15s;
 }
-
-.tab-btn:hover{transform:translateY(-1px);}
-
 .tab-btn.active{
   background:linear-gradient(135deg,#22c55e,#3b82f6);
   color:white;
 }
 
-/* =========================
-   APP LAYOUT
-   ========================= */
+/* ================ APP ================ */
 .app{
   display:flex;
   min-height:calc(100vh - 32px);
@@ -261,7 +212,6 @@ textarea{
   gap:14px;
   transition:left .25s ease;
 }
-
 @media(max-width:900px){
   .sidebar{
     position:fixed;
@@ -280,7 +230,6 @@ textarea{
   align-items:center;
   padding:6px;
 }
-
 .logo{
   width:50px;
   height:50px;
@@ -298,14 +247,12 @@ textarea{
   flex-direction:column;
   gap:10px;
 }
-
 .nav-section{
   margin-top:10px;
   font-size:.8rem;
   opacity:.7;
   padding-left:6px;
 }
-
 .nav-item{
   background:rgba(255,255,255,.10);
   border:none;
@@ -317,17 +264,14 @@ textarea{
   font-weight:900;
   transition:.2s;
 }
-
 .nav-item:hover{
   background:rgba(255,255,255,.16);
   transform:translateY(-1px);
 }
-
 .nav-item.active{
   background:white;
   color:#111827;
 }
-
 .sidebar-footer{margin-top:auto;}
 
 .main{
@@ -336,9 +280,7 @@ textarea{
   overflow:auto;
 }
 
-/* =========================
-   TOPBAR
-   ========================= */
+/* ================ TOPBAR ================ */
 .topbar{
   display:flex;
   gap:12px;
@@ -348,7 +290,6 @@ textarea{
   padding:16px;
   box-shadow:0 8px 20px rgba(0,0,0,.08);
 }
-
 .icon-btn{
   width:46px;
   height:46px;
@@ -359,12 +300,10 @@ textarea{
   font-size:1.1rem;
   cursor:pointer;
 }
-
 .topbar-info h2{
-  font-size:1.25rem;
+  font-size:1.2rem;
   color:#1e40af;
 }
-
 .pill{
   background:linear-gradient(135deg,#22c55e,#3b82f6);
   color:white;
@@ -374,9 +313,7 @@ textarea{
   font-size:.85rem;
 }
 
-/* =========================
-   BUTTONS
-   ========================= */
+/* ================ BUTTONS ================ */
 .btn{
   border:none;
   border-radius:16px;
@@ -387,23 +324,10 @@ textarea{
   margin-top:10px;
   transition:.15s;
 }
-
 .btn:hover{transform:translateY(-2px);opacity:.96;}
-
-.btn-main{
-  background:linear-gradient(135deg,#22c55e,#3b82f6);
-  color:white;
-}
-
-.btn-alt{
-  background:linear-gradient(135deg,#a855f7,#0ea5e9);
-  color:white;
-}
-
-.btn-danger{
-  background:#ef4444;
-  color:white;
-}
+.btn-main{background:linear-gradient(135deg,#22c55e,#3b82f6);color:white;}
+.btn-alt{background:linear-gradient(135deg,#a855f7,#0ea5e9);color:white;}
+.btn-danger{background:#ef4444;color:white;}
 
 .file-btn{
   display:inline-flex;
@@ -419,26 +343,22 @@ textarea{
 }
 .file-btn input{display:none;}
 
-/* =========================
-   GRID HELPERS
-   ========================= */
+/* ================ GRIDS ================ */
 .grid-2{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
-.grid-4{
+.grid-3{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:1fr 1fr 1fr;
   gap:10px;
 }
 @media(max-width:900px){
-  .grid-2, .grid-4{grid-template-columns:1fr;}
+  .grid-2, .grid-3{grid-template-columns:1fr;}
 }
 
-/* =========================
-   CARDS
-   ========================= */
+/* ================ CARDS ================ */
 .stats-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -469,7 +389,6 @@ textarea{
   padding:16px;
   box-shadow:0 10px 28px rgba(0,0,0,.1);
 }
-
 .box{
   background:white;
   border:1px solid #e5e7eb;
@@ -479,24 +398,13 @@ textarea{
   overflow:auto;
 }
 
-.card-mini{
-  margin-top:12px;
-  padding:14px;
-  background:white;
-  border:1px solid #e5e7eb;
-  border-radius:20px;
-}
-
-/* =========================
-   USERS LIST (Admin)
-   ========================= */
+/* ================ USERS LIST ================ */
 .users-list{
   margin-top:12px;
   display:flex;
   flex-direction:column;
   gap:10px;
 }
-
 .user-card{
   background:white;
   border:1px solid #e5e7eb;
@@ -504,14 +412,12 @@ textarea{
   padding:14px;
   box-shadow:0 10px 24px rgba(0,0,0,.06);
 }
-
 .user-title{
   display:flex;
   justify-content:space-between;
   gap:10px;
   align-items:center;
 }
-
 .role-pill{
   padding:6px 12px;
   border-radius:999px;
@@ -519,7 +425,6 @@ textarea{
   font-size:.75rem;
   background:#f3f4f6;
 }
-
 .role-pill.owner{background:#dbeafe;color:#1e40af;}
 .role-pill.staff{background:#fef3c7;color:#92400e;}
 .role-pill.student{background:#dcfce7;color:#166534;}
@@ -530,87 +435,11 @@ textarea{
   gap:10px;
   margin-top:10px;
 }
-
 @media(max-width:900px){
   .user-actions{grid-template-columns:1fr;}
 }
 
-/* =========================
-   PROFILE
-   ========================= */
-.profile-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-@media(max-width:900px){
-  .profile-grid{grid-template-columns:1fr;}
-}
-.profile-block{
-  background:rgba(255,255,255,.92);
-  border:1px solid rgba(255,255,255,.6);
-  border-radius:22px;
-  padding:14px;
-  box-shadow:0 10px 28px rgba(0,0,0,.08);
-}
-.pic-row{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  margin-bottom:10px;
-}
-.pic-wrap{
-  width:86px;
-  height:86px;
-  border-radius:22px;
-  background:rgba(17,24,39,.1);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  position:relative;
-}
-.profile-pic{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:none;
-}
-.pic-fallback{
-  font-size:2rem;
-  color:#111827;
-}
-
-/* =========================
-   CALENDAR
-   ========================= */
-.calendar-wrap{margin-top:10px;}
-.calendar-grid{
-  margin-top:10px;
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:8px;
-}
-.day{
-  aspect-ratio:1/1;
-  border-radius:16px;
-  background:white;
-  border:1px solid #e5e7eb;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-  user-select:none;
-}
-.day.mutedday{opacity:.3;}
-.day.present{outline:3px solid #22c55e;}
-.day.absent{outline:3px solid #ef4444;}
-.day.od{outline:3px solid #3b82f6;}
-.day.leave{outline:3px solid #a855f7;}
-
-/* =========================
-   ADMIN ATTENDANCE BUTTONS
-   ========================= */
+/* ================ ADMIN ATTENDANCE BUTTONS ================ */
 .student-grid{
   margin-top:12px;
   display:grid;
@@ -620,7 +449,6 @@ textarea{
 @media(max-width:900px){
   .student-grid{grid-template-columns:1fr;}
 }
-
 .student-btn{
   border:none;
   border-radius:20px;
@@ -643,7 +471,6 @@ textarea{
   font-weight:900;
   margin-top:8px;
 }
-
 .badge.present{ background:#dcfce7; color:#166534; }
 .badge.absent{ background:#fee2e2; color:#991b1b; }
 .badge.od{ background:#dbeafe; color:#1e40af; }
@@ -669,12 +496,13 @@ textarea{
 .legend-pill.od{background:#dbeafe;color:#1e40af;}
 .legend-pill.leave{background:#f3e8ff;color:#6b21a8;}
 
-/* =========================
-   POPUP
-   ========================= */
+/* ================ POPUP ================ */
 .popup-overlay{
   position:fixed;
-  inset:0;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
   background:rgba(0,0,0,.55);
   display:flex;
   align-items:center;
@@ -682,24 +510,13 @@ textarea{
   z-index:9999;
   padding:18px;
 }
-
 .popup-box{
   width:100%;
   max-width:380px;
-  background:rgba(255,255,255,.98);
+  background:rgba(255,255,255,.96);
   border-radius:18px;
   padding:18px;
   border:1px solid rgba(255,255,255,.7);
   box-shadow:0 18px 40px rgba(0,0,0,.25);
   text-align:center;
-}
-
-.popup-box h3{
-  color:#1e40af;
-  margin-bottom:8px;
-}
-
-.popup-box p{
-  color:#374151;
-  line-height:1.4;
 }
