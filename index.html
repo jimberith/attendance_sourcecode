@@ -87,13 +87,12 @@
       <nav class="nav">
         <button class="nav-item active" data-page="dashboardPage">🏠 Dashboard</button>
         <button class="nav-item" data-page="attendancePage">📅 Attendance</button>
-        <button class="nav-item" data-page="marksPage">📊 Marks</button>
+        <button class="nav-item" data-page="marksPage">📊 Results</button>
         <button class="nav-item" data-page="profilePage">👤 Profile</button>
 
         <div id="adminNavBlock" class="admin-only hidden">
           <p class="nav-section">Admin Tools</p>
           <button class="nav-item" data-page="adminUsersPage">👥 Users</button>
-          <button class="nav-item" data-page="adminSetupPage">⚙️ Setup</button>
         </div>
       </nav>
 
@@ -128,15 +127,16 @@
             <h3 id="subStat">0</h3>
           </div>
           <div class="stat-card">
-            <p class="muted small">Marks</p>
+            <p class="muted small">Results</p>
             <h3 id="marksStat">0</h3>
           </div>
         </div>
 
         <div class="card fancy-card">
-          <h3>Quick Info</h3>
-          <div class="box" id="dashboardInfoBox">
-            Welcome to <b>ATTENDIFY</b>. Use Attendance tab to view or mark attendance.
+          <h3>CGPA</h3>
+          <div class="box">
+            <h2 style="margin:0;" id="cgpaText">0.00</h2>
+            <p class="muted small">Calculated from your subjects</p>
           </div>
         </div>
       </section>
@@ -182,19 +182,46 @@
         </div>
       </section>
 
-      <!-- MARKS -->
+      <!-- RESULTS -->
       <section class="page hidden" id="marksPage">
         <div class="card fancy-card">
-          <h3>Marks</h3>
-          <div id="marksView" class="box"></div>
+          <h3>📊 Results</h3>
+
+          <button class="btn btn-main" id="resultsBtn">RESULTS</button>
+
+          <div id="resultsTabs" class="auth-tabs hidden" style="margin-top:12px;">
+            <button class="tab-btn active" data-type="internal">Internal</button>
+            <button class="tab-btn" data-type="assessment">Assessment</button>
+            <button class="tab-btn" data-type="exam">Exam</button>
+          </div>
+
+          <div id="resultsView" class="box" style="margin-top:12px;"></div>
+
+          <button class="btn btn-alt" id="downloadPdfBtn" style="margin-top:12px;">
+            📄 Download PDF Marksheet
+          </button>
         </div>
 
+        <!-- ADMIN MARKS -->
         <div class="card fancy-card admin-only hidden" id="adminMarksCard">
-          <h3>Update Marks</h3>
+          <h3>Update Marks (Admin)</h3>
+
+          <label class="tiny-label">Class</label>
+          <select id="marksClassSelect"></select>
+
+          <label class="tiny-label">Student</label>
           <select id="marksStudentSelect"></select>
+
+          <label class="tiny-label">Subject</label>
           <select id="subjectSelect"></select>
-          <input type="number" id="marksValue" placeholder="0-100"/>
-          <button class="btn btn-alt" id="saveMarksBtn">Save</button>
+
+          <div class="grid-3">
+            <input type="number" id="internalMarks" placeholder="Internal (0-30)" />
+            <input type="number" id="assessmentMarks" placeholder="Assessment (0-20)" />
+            <input type="number" id="examMarks" placeholder="Exam (0-50)" />
+          </div>
+
+          <button class="btn btn-main" id="saveMarksBtn">Save Marks</button>
         </div>
       </section>
 
@@ -242,22 +269,11 @@
               <textarea id="addressInput" placeholder="Address"></textarea>
 
               <button class="btn btn-main" id="saveProfileBtn">Update Profile</button>
-
-              <div id="profileInfoView" class="box" style="margin-top:10px;"></div>
             </div>
 
             <div class="profile-block">
-              <h4>Attendance Calendar</h4>
-              <div class="calendar-wrap">
-                <input type="month" id="monthPicker"/>
-                <div id="calendarGrid" class="calendar-grid"></div>
-              </div>
-
-              <div class="card-mini">
-                <p class="muted small">Attendance %</p>
-                <h3 id="attPercent">0%</h3>
-                <p class="muted small" id="attRangeText"></p>
-              </div>
+              <h4>Info</h4>
+              <div class="box" id="profileInfoView">Loading...</div>
             </div>
           </div>
         </div>
@@ -266,56 +282,19 @@
       <!-- ADMIN USERS -->
       <section class="page hidden" id="adminUsersPage">
         <div class="card fancy-card">
-          <h3>Users (Admin Control)</h3>
+          <h3>👥 Users Control (Owner)</h3>
 
-          <div class="card-mini">
-            <h4>Add Student</h4>
-            <div class="grid-4">
-              <input type="text" id="newUserName" placeholder="Name"/>
-              <input type="text" id="newUserRoll" placeholder="Roll"/>
-              <input type="email" id="newUserEmail" placeholder="Email"/>
-              <input type="password" id="newUserPass" placeholder="Password"/>
-            </div>
-            <button class="btn btn-main" id="addUserBtn">Add Student</button>
+          <div class="grid-2" style="margin-top:8px;">
+            <input type="text" id="userSearch" placeholder="Search by name / roll / class"/>
+            <select id="roleFilter">
+              <option value="">All Roles</option>
+              <option value="owner">Owner</option>
+              <option value="staff">Staff</option>
+              <option value="student">Student</option>
+            </select>
           </div>
 
-          <div class="card-mini">
-            <h4>All Users</h4>
-            <div class="grid-2" style="margin-top:8px;">
-              <input type="text" id="userSearch" placeholder="Search by name / roll / class"/>
-              <select id="roleFilter">
-                <option value="">All Roles</option>
-                <option value="owner">Owner</option>
-                <option value="staff">Staff</option>
-                <option value="student">Student</option>
-              </select>
-            </div>
-
-            <div id="allUsersView" class="users-list"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ADMIN SETUP -->
-      <section class="page hidden" id="adminSetupPage">
-        <div class="card fancy-card">
-          <h3>Setup</h3>
-
-          <div class="grid-2">
-            <div class="card-mini">
-              <h4>Add Class</h4>
-              <input type="text" id="newClassName" placeholder="Class Name"/>
-              <button class="btn btn-main" id="addClassBtn">Add Class</button>
-            </div>
-
-            <div class="card-mini">
-              <h4>Add Subject</h4>
-              <input type="text" id="newSubjectName" placeholder="Subject Name"/>
-              <button class="btn btn-alt" id="addSubjectBtn">Add Subject</button>
-            </div>
-          </div>
-
-          <div id="subjectsView" class="box" style="margin-top:10px;"></div>
+          <div id="allUsersView" class="users-list"></div>
         </div>
       </section>
 
