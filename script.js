@@ -1,28 +1,21 @@
 document.addEventListener("DOMContentLoaded", () => {
   const API_BASE = "https://attendance-backend-7m9r.onrender.com";
 
-  // ======================
-  // Offline + Loading
-  // ======================
   const offlineScreen = document.getElementById("offlineScreen");
   const loadingOverlay = document.getElementById("loadingOverlay");
 
   function setLoading(on) {
-    if (on) loadingOverlay.classList.remove("hidden");
-    else loadingOverlay.classList.add("hidden");
+    loadingOverlay.classList.toggle("hidden", !on);
   }
 
   function updateOnlineUI() {
-    if (navigator.onLine) offlineScreen.classList.add("hidden");
-    else offlineScreen.classList.remove("hidden");
+    offlineScreen.classList.toggle("hidden", navigator.onLine);
   }
+
   window.addEventListener("online", updateOnlineUI);
   window.addEventListener("offline", updateOnlineUI);
   updateOnlineUI();
 
-  // ======================
-  // Popup
-  // ======================
   const popupOverlay = document.getElementById("popupOverlay");
   const popupTitle = document.getElementById("popupTitle");
   const popupMessage = document.getElementById("popupMessage");
@@ -35,9 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   popupOkBtn.addEventListener("click", () => popupOverlay.classList.add("hidden"));
 
-  // ======================
-  // Token + Session
-  // ======================
   function setToken(token) { localStorage.setItem("token", token); }
   function getToken() { return localStorage.getItem("token"); }
   function clearToken() { localStorage.removeItem("token"); }
@@ -46,31 +36,24 @@ document.addEventListener("DOMContentLoaded", () => {
   function getUser() { return JSON.parse(localStorage.getItem("user") || "null"); }
   function clearUser() { localStorage.removeItem("user"); }
 
-  // ======================
-  // Fetch helper
-  // ======================
   async function apiFetch(path, options = {}) {
     try {
       const token = getToken();
-      const headers = {
-        "Content-Type": "application/json",
-        ...(options.headers || {})
-      };
+      const headers = { ...(options.headers || {}) };
+
+      if (!(options.body instanceof FormData)) headers["Content-Type"] = "application/json";
       if (token) headers.Authorization = "Bearer " + token;
 
       const res = await fetch(API_BASE + path, { ...options, headers });
       const text = await res.text();
 
       try { return JSON.parse(text); }
-      catch { return { success: false, message: "Invalid server JSON" }; }
+      catch { return { success: false, message: "Invalid server JSON", raw: text }; }
     } catch (err) {
       return { success: false, message: "Network error: " + err.message };
     }
   }
 
-  // ======================
-  // UI Base
-  // ======================
   const authSection = document.getElementById("authSection");
   const homeSection = document.getElementById("homeSection");
   const sidebar = document.getElementById("sidebar");
@@ -94,15 +77,31 @@ document.addEventListener("DOMContentLoaded", () => {
   function refreshHeader() {
     const user = getUser();
     if (!user) return;
+
     document.getElementById("welcomeText").textContent = `Welcome, ${user.name}`;
     document.getElementById("roleText").textContent = `Role: ${user.role.toUpperCase()}`;
     document.getElementById("enrolledPill").textContent =
       user.enrolledClass ? `Class: ${user.enrolledClass}` : "Not Enrolled";
   }
 
-  // ======================
-  // Auth Tabs
-  // ======================
+  function applyLocksUI() {
+    const user = getUser();
+    if (!user) return;
+
+    const locks = user.locks || {};
+
+    const saveProfileBtn = document.getElementById("saveProfileBtn");
+    const registerFaceBtn = document.getElementById("registerFaceBtn");
+    const uploadLabel = document.getElementById("uploadPhotoLabel");
+    const profilePicInput = document.getElementById("profilePicInput");
+
+    if (saveProfileBtn) saveProfileBtn.disabled = !!locks.profileUpdateLocked;
+    if (registerFaceBtn) registerFaceBtn.disabled = !!locks.faceRegisterLocked;
+
+    if (uploadLabel) uploadLabel.classList.toggle("locked", !!locks.photoUploadLocked);
+    if (profilePicInput) profilePicInput.disabled = !!locks.photoUploadLocked;
+  }
+
   let authMode = "login";
   const showLoginTab = document.getElementById("showLoginTab");
   const showSignupTab = document.getElementById("showSignupTab");
@@ -113,29 +112,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setAuthMode(mode) {
     authMode = mode;
-    if (mode === "login") {
-      showLoginTab.classList.add("active");
-      showSignupTab.classList.remove("active");
-      signupFields.classList.add("hidden");
-      loginFields.classList.remove("hidden");
-      submitAuthBtn.textContent = "Login";
-      authTitle.textContent = "Login";
-    } else {
-      showSignupTab.classList.add("active");
-      showLoginTab.classList.remove("active");
-      signupFields.classList.remove("hidden");
-      loginFields.classList.add("hidden");
-      submitAuthBtn.textContent = "Signup";
-      authTitle.textContent = "Signup";
-    }
+    showLoginTab.classList.toggle("active", mode === "login");
+    showSignupTab.classList.toggle("active", mode === "signup");
+    signupFields.classList.toggle("hidden", mode !== "signup");
+    loginFields.classList.toggle("hidden", mode !== "login");
+    submitAuthBtn.textContent = mode === "login" ? "Login" : "Signup";
+    authTitle.textContent = mode === "login" ? "Login" : "Signup";
   }
+
   showLoginTab.addEventListener("click", () => setAuthMode("login"));
   showSignupTab.addEventListener("click", () => setAuthMode("signup"));
   setAuthMode("login");
 
-  // ======================
-  // Signup / Login / Logout
-  // ======================
   async function signup() {
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim().toLowerCase();
@@ -155,13 +143,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setToken(data.token);
     setUser(data.user);
-    msg("Signup successful ✅", "Success");
     loadApp();
   }
 
   async function login() {
     const loginId = document.getElementById("loginId").value.trim();
     const password = document.getElementById("password").value.trim();
+
     if (!loginId || !password) return msg("Fill all fields", "Warning");
 
     setLoading(true);
@@ -175,32 +163,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setToken(data.token);
     setUser(data.user);
-    msg("Login successful ✅", "Success");
     loadApp();
   }
 
   function logout() {
     clearToken();
     clearUser();
-    msg("Logged out ✅", "Logout");
     loadApp();
   }
 
   document.getElementById("logoutBtn").addEventListener("click", logout);
+  submitAuthBtn.addEventListener("click", () => authMode === "login" ? login() : signup());
 
-  submitAuthBtn.addEventListener("click", () => {
-    if (authMode === "login") login();
-    else signup();
-  });
-
-  // Sidebar menu
   document.getElementById("menuBtn").addEventListener("click", () => {
     sidebar.classList.toggle("open");
   });
 
-  // ======================
-  // Cached data
-  // ======================
   let cachedUsers = [];
   let cachedClasses = [];
   let cachedSubjects = [];
@@ -219,17 +197,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cachedClasses = (data.classes || []).map(c => c.name);
 
-    ["studentClassSelect", "adminAttendanceClassSelect", "marksClassSelect"].forEach(id => {
-      const sel = document.getElementById(id);
-      if (!sel) return;
-      sel.innerHTML = "";
+    const studentClassSelect = document.getElementById("studentClassSelect");
+    const adminAttendanceClassSelect = document.getElementById("adminAttendanceClassSelect");
+
+    if (studentClassSelect) {
+      studentClassSelect.innerHTML = "";
       cachedClasses.forEach(c => {
         const opt = document.createElement("option");
         opt.value = c;
         opt.textContent = c;
-        sel.appendChild(opt);
+        studentClassSelect.appendChild(opt);
       });
-    });
+    }
+
+    if (adminAttendanceClassSelect) {
+      adminAttendanceClassSelect.innerHTML = "";
+      cachedClasses.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        adminAttendanceClassSelect.appendChild(opt);
+      });
+    }
 
     return cachedClasses;
   }
@@ -240,25 +229,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     cachedSubjects = (data.subjects || []).map(s => s.name);
 
-    const subjectSelect = document.getElementById("subjectSelect");
-    if (subjectSelect) {
-      subjectSelect.innerHTML = "";
-      cachedSubjects.forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s;
-        opt.textContent = s;
-        subjectSelect.appendChild(opt);
-      });
+    const subjectsView = document.getElementById("subjectsView");
+    if (subjectsView) {
+      subjectsView.innerHTML = cachedSubjects.map((s, i) => `${i + 1}. <b>${s}</b>`).join("<br/>");
     }
 
     return cachedSubjects;
   }
 
-  // ======================
-  // Enroll
-  // ======================
-  document.getElementById("enrollBtn").addEventListener("click", async () => {
+  document.getElementById("enrollBtn")?.addEventListener("click", async () => {
     const className = document.getElementById("studentClassSelect").value;
+    if (!className) return;
 
     setLoading(true);
     const data = await apiFetch("/enroll", {
@@ -269,44 +250,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!data.success) return msg(data.message, "Error");
 
-    const me = await apiFetch("/me");
-    if (me.success) setUser(me.user);
-
+    setUser(data.user);
     refreshHeader();
-    msg("Enrolled ✅", "Success");
   });
 
-  // ======================
-  // Attendance cycle buttons (ADMIN)
-  // ======================
   const STATUS_ORDER = ["Present", "Absent", "On Duty (O/D)", "Leave"];
 
-  function statusClass(status){
-    if(status === "Present") return "present";
-    if(status === "Absent") return "absent";
-    if(status === "On Duty (O/D)") return "od";
-    if(status === "Leave") return "leave";
+  function statusClass(status) {
+    if (status === "Present") return "present";
+    if (status === "Absent") return "absent";
+    if (status === "On Duty (O/D)") return "od";
+    if (status === "Leave") return "leave";
     return "none";
   }
 
-  function nextStatus(cur){
+  function nextStatus(cur) {
     const idx = STATUS_ORDER.indexOf(cur);
-    if(idx === -1) return "Present";
+    if (idx === -1) return "Present";
     return STATUS_ORDER[(idx + 1) % STATUS_ORDER.length];
   }
 
-  async function loadAdminAttendanceButtons(){
-    const className = document.getElementById("adminAttendanceClassSelect").value;
-    const date = document.getElementById("adminAttendanceDate").value;
+  async function loadAdminAttendanceButtons() {
+    const className = document.getElementById("adminAttendanceClassSelect")?.value;
+    const date = document.getElementById("adminAttendanceDate")?.value;
     const container = document.getElementById("adminAttendanceButtons");
+    if (!container) return;
 
-    container.innerHTML = "Loading...";
+    if (!className || !date) {
+      container.innerHTML = "";
+      return;
+    }
 
-    if(!cachedUsers.length) await loadUsersForAdmin();
+    if (!cachedUsers.length) await loadUsersForAdmin();
 
-    const students = cachedUsers.filter(u =>
-      u.enrolledClass === className && u.role !== "owner"
-    );
+    const students = cachedUsers.filter(u => u.enrolledClass === className && u.role === "student");
 
     const data = await apiFetch("/owner/attendance/by-date", {
       method: "POST",
@@ -314,23 +291,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const map = new Map();
-    if(data.success && data.records){
-      data.records.forEach(r => map.set(r.rollNumber, r.status));
-    }
+    if (data.success && data.records) data.records.forEach(r => map.set(r.rollNumber, r.status));
 
     container.innerHTML = "";
-
-    if(students.length === 0){
-      container.innerHTML = "No students enrolled in this class.";
-      return;
-    }
 
     students.forEach(s => {
       const current = map.get(s.rollNumber) || "";
 
       const btn = document.createElement("button");
       btn.className = "student-btn";
-      btn.dataset.roll = s.rollNumber;
       btn.dataset.status = current;
 
       btn.innerHTML = `
@@ -348,8 +317,13 @@ document.addEventListener("DOMContentLoaded", () => {
         badge.textContent = newStatus;
 
         await apiFetch("/owner/attendance", {
-          method:"POST",
-          body: JSON.stringify({ rollNumber:s.rollNumber, className, status:newStatus, date })
+          method: "POST",
+          body: JSON.stringify({
+            rollNumber: s.rollNumber,
+            className,
+            status: newStatus,
+            date
+          })
         });
       });
 
@@ -357,240 +331,66 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  document.getElementById("adminAttendanceClassSelect").addEventListener("change", loadAdminAttendanceButtons);
-  document.getElementById("adminAttendanceDate").addEventListener("change", loadAdminAttendanceButtons);
+  document.getElementById("adminAttendanceClassSelect")?.addEventListener("change", loadAdminAttendanceButtons);
+  document.getElementById("adminAttendanceDate")?.addEventListener("change", loadAdminAttendanceButtons);
 
-  // ======================
-  // Student attendance view
-  // ======================
-  async function loadStudentAttendance(){
+  async function loadStudentAttendance() {
     const data = await apiFetch("/attendance");
     const box = document.getElementById("attendanceView");
-    if(!data.success || !data.records.length){
+    if (!box) return;
+
+    if (!data.success || !data.records?.length) {
       box.innerHTML = "No attendance";
       return;
     }
+
     box.innerHTML = data.records
       .map(r => `<b>${r.date}</b> | ${r.className} | <b>${r.status}</b>`)
       .join("<br/>");
   }
 
-  // ======================
-  // Results tabs (Student)
-  // ======================
-  document.getElementById("resultsBtn").addEventListener("click", () => {
-    document.getElementById("resultsTabs").classList.toggle("hidden");
-  });
-
-  async function loadResults(type){
+  async function loadResults(type = "internal") {
     const data = await apiFetch("/results");
     const box = document.getElementById("resultsView");
+    if (!box) return;
 
-    if(!data.success || !data.records.length){
-      box.innerHTML = "No results available.";
+    if (!data.success || !data.records?.length) {
+      box.innerHTML = "No results";
       return;
     }
 
     box.innerHTML = data.records.map(r => {
       let value = 0;
-      if(type === "internal") value = r.internal;
-      if(type === "assessment") value = r.assessment;
-      if(type === "exam") value = r.exam;
+      if (type === "internal") value = r.internal || 0;
+      if (type === "assessment") value = r.assessment || 0;
+      if (type === "exam") value = r.exam || 0;
 
-      return `
-        <div style="padding:10px;border-bottom:1px solid #e5e7eb;">
-          <b>${r.subject}</b><br/>
-          ${type.toUpperCase()}: <b>${value}</b><br/>
-          Total: <b>${r.total}</b>/100
-        </div>
-      `;
-    }).join("");
+      return `<b>${r.subject}</b> : ${value} / 100`;
+    }).join("<br/>");
   }
 
-  document.querySelectorAll("#resultsTabs .tab-btn").forEach(btn => {
+  document.querySelectorAll("#resultsPage .results-tabs .tab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll("#resultsTabs .tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll("#resultsPage .results-tabs .tab-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       loadResults(btn.dataset.type);
     });
   });
 
-  // ======================
-  // Marks upload (Admin)
-  // ======================
-  async function loadStudentsForMarksClass(){
-    const className = document.getElementById("marksClassSelect").value;
-    const sel = document.getElementById("marksStudentSelect");
-    sel.innerHTML = "";
-
-    if(!cachedUsers.length) await loadUsersForAdmin();
-
-    const list = cachedUsers.filter(u => u.enrolledClass === className && u.role !== "owner");
-    list.forEach(u => {
-      const opt = document.createElement("option");
-      opt.value = u.rollNumber;
-      opt.textContent = `${u.name} (${u.rollNumber})`;
-      sel.appendChild(opt);
-    });
-  }
-  document.getElementById("marksClassSelect").addEventListener("change", loadStudentsForMarksClass);
-
-  document.getElementById("saveMarksBtn").addEventListener("click", async () => {
-    const className = document.getElementById("marksClassSelect").value;
-    const rollNumber = document.getElementById("marksStudentSelect").value;
-    const subject = document.getElementById("subjectSelect").value;
-
-    const internal = Number(document.getElementById("internalMarks").value || 0);
-    const assessment = Number(document.getElementById("assessmentMarks").value || 0);
-    const exam = Number(document.getElementById("examMarks").value || 0);
-
-    if(internal < 0 || internal > 30) return msg("Internal must be 0-30","Warning");
-    if(assessment < 0 || assessment > 20) return msg("Assessment must be 0-20","Warning");
-    if(exam < 0 || exam > 50) return msg("Exam must be 0-50","Warning");
-
-    setLoading(true);
-    const data = await apiFetch("/owner/marks", {
-      method:"POST",
-      body: JSON.stringify({ rollNumber, className, subject, internal, assessment, exam })
-    });
-    setLoading(false);
-
-    if(!data.success) return msg(data.message || "Failed","Error");
-
-    msg("Marks saved ✅ (Mail/WhatsApp works only if backend env configured)", "Success");
-  });
-
-  // ======================
-  // CGPA
-  // ======================
-  async function loadCGPA(){
+  async function loadCGPA() {
     const data = await apiFetch("/cgpa");
-    if(data.success){
-      document.getElementById("cgpaText").textContent = Number(data.cgpa).toFixed(2);
+    if (data.success) {
+      document.getElementById("cgpaText").textContent = Number(data.cgpa || 0).toFixed(2);
     }
   }
 
-  // PDF download
-  document.getElementById("downloadPdfBtn").addEventListener("click", () => {
+  document.getElementById("downloadPdfBtn")?.addEventListener("click", () => {
     window.open(API_BASE + "/marksheet/pdf", "_blank");
   });
 
-  // ======================
-  // Admin Users list (buttons)
-  // ======================
-  async function setRole(rollNumber, role){
-    setLoading(true);
-    const data = await apiFetch("/owner/set-role", {
-      method:"POST",
-      body: JSON.stringify({ rollNumber, role })
-    });
-    setLoading(false);
-
-    if(!data.success) return msg(data.message, "Error");
-    msg(`Role changed to ${role} ✅`, "Success");
-    await loadUsersForAdmin();
-  }
-
-  async function giveStaffPermission(staffRollNumber, className){
-    setLoading(true);
-    const data = await apiFetch("/owner/staff-permission", {
-      method:"POST",
-      body: JSON.stringify({ staffRollNumber, className })
-    });
-    setLoading(false);
-
-    if(!data.success) return msg(data.message, "Error");
-    msg("Staff permission granted ✅", "Success");
-  }
-
-  async function viewUserProfile(u){
-    msg(
-      `Name: ${u.name}\nRoll: ${u.rollNumber}\nEmail: ${u.email}\nRole: ${u.role}\nClass: ${u.enrolledClass || "-"}\nPhone: ${u.phone || "-"}`,
-      "User Profile"
-    );
-  }
-
-  function renderUsersAdmin(){
-    const view = document.getElementById("allUsersView");
-    if(!view) return;
-
-    const q = (document.getElementById("userSearch").value || "").toLowerCase();
-    const roleFilter = document.getElementById("roleFilter").value || "";
-
-    const filtered = cachedUsers.filter(u => {
-      const hay = `${u.name} ${u.rollNumber} ${u.enrolledClass || ""}`.toLowerCase();
-      const okSearch = !q || hay.includes(q);
-      const okRole = !roleFilter || u.role === roleFilter;
-      return okSearch && okRole;
-    });
-
-    view.innerHTML = "";
-
-    filtered.forEach(u => {
-      const card = document.createElement("div");
-      card.className = "user-card";
-
-      card.innerHTML = `
-        <div class="user-title">
-          <div>
-            <b>${u.name}</b><br/>
-            <span class="muted small">Roll: ${u.rollNumber} | Class: ${u.enrolledClass || "-"}</span>
-          </div>
-          <span class="role-pill ${u.role}">${u.role.toUpperCase()}</span>
-        </div>
-
-        <div class="user-actions">
-          <button class="btn btn-alt viewBtn">View</button>
-          <button class="btn btn-main staffBtn">Make Staff</button>
-          <button class="btn btn-danger studentBtn">Make Student</button>
-        </div>
-
-        <div style="margin-top:10px;">
-          <label class="tiny-label">Assign Staff to Class</label>
-          <select class="classSel"></select>
-          <button class="btn btn-main giveBtn">Give Permission</button>
-        </div>
-      `;
-
-      const sel = card.querySelector(".classSel");
-      cachedClasses.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        sel.appendChild(opt);
-      });
-
-      card.querySelector(".viewBtn").addEventListener("click", () => viewUserProfile(u));
-      card.querySelector(".staffBtn").addEventListener("click", () => setRole(u.rollNumber, "staff"));
-      card.querySelector(".studentBtn").addEventListener("click", () => setRole(u.rollNumber, "student"));
-      card.querySelector(".giveBtn").addEventListener("click", () => giveStaffPermission(u.rollNumber, sel.value));
-
-      view.appendChild(card);
-    });
-  }
-
-  document.getElementById("userSearch").addEventListener("input", renderUsersAdmin);
-  document.getElementById("roleFilter").addEventListener("change", renderUsersAdmin);
-
-  // ======================
-  // Stats
-  // ======================
-  async function refreshStats(){
-    const att = await apiFetch("/attendance");
-    const subs = await apiFetch("/subjects");
-    const results = await apiFetch("/results");
-
-    document.getElementById("attStat").textContent = att.success ? att.records.length : 0;
-    document.getElementById("subStat").textContent = subs.success ? subs.subjects.length : 0;
-    document.getElementById("marksStat").textContent = results.success ? results.records.length : 0;
-  }
-
-  // ======================
-  // Profile loading UI
-  // ======================
-  function loadProfileUI(){
+  function loadProfileUI() {
     const user = getUser();
-    if(!user) return;
+    if (!user) return;
 
     document.getElementById("editName").value = user.name || "";
     document.getElementById("editRoll").value = user.rollNumber || "";
@@ -600,53 +400,57 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("addressInput").value = user.address || "";
     document.getElementById("editPassword").value = "";
 
-    document.getElementById("profileInfoView").innerHTML = `
-      <b>${user.name}</b><br/>
-      Roll: ${user.rollNumber}<br/>
-      Email: ${user.email}<br/>
-      Role: ${user.role}<br/>
-      Class: ${user.enrolledClass || "Not enrolled"}
-    `;
+    document.getElementById("profileInfoView").innerHTML =
+      `<b>${user.name}</b><br/>Roll: ${user.rollNumber}<br/>${user.role}<br/>${user.enrolledClass || "-"}`;
 
     const img = document.getElementById("profilePicPreview");
     const fallback = document.getElementById("picFallback");
-    if(user.profilePic){
+
+    if (user.profilePic) {
       img.src = user.profilePic;
       img.style.display = "block";
       fallback.style.display = "none";
-    }else{
+    } else {
       img.style.display = "none";
       fallback.style.display = "flex";
     }
+
+    applyLocksUI();
   }
 
-  // photo upload
-  document.getElementById("profilePicInput").addEventListener("change", (e) => {
+  document.getElementById("profilePicInput")?.addEventListener("change", async (e) => {
+    const user = getUser();
+    if (!user) return;
+
+    if (user?.locks?.photoUploadLocked) return msg("Photo upload locked", "Blocked");
+
     const file = e.target.files?.[0];
-    if(!file) return;
+    if (!file) return;
 
     const reader = new FileReader();
     reader.onload = async () => {
-      const base64 = reader.result;
-
       setLoading(true);
-      const data = await apiFetch("/profile", {
-        method:"POST",
-        body: JSON.stringify({ profilePic: base64 })
+      const data = await apiFetch("/profile/photo", {
+        method: "POST",
+        body: JSON.stringify({ profilePic: reader.result })
       });
       setLoading(false);
 
-      if(!data.success) return msg(data.message, "Error");
+      if (!data.success) return msg(data.message, "Error");
 
       setUser(data.user);
       loadProfileUI();
-      msg("Profile photo updated ✅", "Updated");
+      msg("Photo updated", "Done");
     };
     reader.readAsDataURL(file);
   });
 
-  // update profile
-  document.getElementById("saveProfileBtn").addEventListener("click", async () => {
+  document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
+    const user = getUser();
+    if (!user) return;
+
+    if (user?.locks?.profileUpdateLocked) return msg("Profile update locked", "Blocked");
+
     const name = document.getElementById("editName").value.trim();
     const rollNumber = document.getElementById("editRoll").value.trim();
     const phone = document.getElementById("phoneInput").value.trim();
@@ -656,65 +460,259 @@ document.addEventListener("DOMContentLoaded", () => {
     const password = document.getElementById("editPassword").value.trim();
 
     setLoading(true);
-    const data = await apiFetch("/profile", {
-      method:"POST",
+    const data = await apiFetch("/profile/update", {
+      method: "POST",
       body: JSON.stringify({ name, rollNumber, phone, gender, dob, address, password })
     });
     setLoading(false);
 
-    if(!data.success) return msg(data.message, "Error");
+    if (!data.success) return msg(data.message, "Error");
 
     setUser(data.user);
     refreshHeader();
     loadProfileUI();
-    msg("Profile updated ✅", "Success");
+    msg("Profile updated", "Done");
   });
 
-  // ======================
-  // Navigation
-  // ======================
+  async function registerFaceCamera() {
+    const user = getUser();
+    if (!user) return;
+
+    if (user?.locks?.faceRegisterLocked) return msg("Face register locked", "Blocked");
+
+    if (!user.enrolledClass) return msg("Enroll first", "Error");
+    if (!navigator.mediaDevices?.getUserMedia) return msg("Camera not supported", "Error");
+
+    let stream = null;
+    let video = null;
+
+    const stopCamera = () => {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+      if (video) {
+        video.srcObject = null;
+        video.remove();
+      }
+    };
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+
+      video = document.createElement("video");
+      video.autoplay = true;
+      video.playsInline = true;
+      video.style.position = "fixed";
+      video.style.left = "-9999px";
+      document.body.appendChild(video);
+
+      video.srcObject = stream;
+
+      await new Promise(resolve => video.onloadedmetadata = resolve);
+      await new Promise(r => setTimeout(r, 600));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.95));
+
+      stopCamera();
+
+      if (!blob) return msg("Capture failed", "Error");
+
+      const formData = new FormData();
+      formData.append("image", blob, "face.jpg");
+
+      setLoading(true);
+      const data = await apiFetch("/face/enroll", {
+        method: "POST",
+        body: formData
+      });
+      setLoading(false);
+
+      if (!data.success) return msg(data.message, "Error");
+
+      setUser(data.user);
+      loadProfileUI();
+      msg("Face registered", "Done");
+    } catch (err) {
+      stopCamera();
+      msg("Camera error", "Error");
+    }
+  }
+
+  document.getElementById("registerFaceBtn")?.addEventListener("click", registerFaceCamera);
+
+  async function refreshStats() {
+    const att = await apiFetch("/attendance");
+    const subs = await apiFetch("/subjects");
+    const res = await apiFetch("/results");
+
+    document.getElementById("attStat").textContent = att.success ? att.records.length : 0;
+    document.getElementById("subStat").textContent = subs.success ? subs.subjects.length : 0;
+    document.getElementById("resStat").textContent = res.success ? res.records.length : 0;
+  }
+
+  async function addClass() {
+    const name = document.getElementById("newClassName").value.trim();
+    if (!name) return;
+
+    setLoading(true);
+    const data = await apiFetch("/owner/class", {
+      method: "POST",
+      body: JSON.stringify({ name })
+    });
+    setLoading(false);
+
+    if (!data.success) return msg(data.message, "Error");
+
+    document.getElementById("newClassName").value = "";
+    await loadClasses();
+  }
+
+  async function addSubject() {
+    const name = document.getElementById("newSubjectName").value.trim();
+    if (!name) return;
+
+    setLoading(true);
+    const data = await apiFetch("/owner/subject", {
+      method: "POST",
+      body: JSON.stringify({ name })
+    });
+    setLoading(false);
+
+    if (!data.success) return msg(data.message, "Error");
+
+    document.getElementById("newSubjectName").value = "";
+    await loadSubjects();
+  }
+
+  document.getElementById("addClassBtn")?.addEventListener("click", addClass);
+  document.getElementById("addSubjectBtn")?.addEventListener("click", addSubject);
+
+  function rolePillClass(role){
+    if(role === "owner") return "owner";
+    if(role === "staff") return "staff";
+    return "student";
+  }
+
+  function renderUsersAdmin() {
+    const view = document.getElementById("allUsersView");
+    if (!view) return;
+
+    view.innerHTML = cachedUsers.map(u => `
+      <div class="user-card">
+        <div class="user-title">
+          <div>
+            <b>${u.name}</b><br/>
+            <span class="muted small">Roll: ${u.rollNumber} | Class: ${u.enrolledClass || "-"}</span>
+          </div>
+          <span class="role-pill ${rolePillClass(u.role)}">${u.role.toUpperCase()}</span>
+        </div>
+
+        <div class="user-actions">
+          <button class="btn btn-alt" data-action="role" data-roll="${u.rollNumber}">
+            ${u.role === "staff" ? "Make Student" : "Make Staff"}
+          </button>
+
+          <button class="btn btn-main" data-action="unlock" data-roll="${u.rollNumber}">
+            Unlock Actions
+          </button>
+
+          <button class="btn btn-danger" data-action="lock" data-roll="${u.rollNumber}">
+            Lock Actions
+          </button>
+        </div>
+      </div>
+    `).join("");
+
+    view.querySelectorAll("button[data-action]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const roll = btn.dataset.roll;
+        const action = btn.dataset.action;
+
+        if(action === "role"){
+          setLoading(true);
+          const data = await apiFetch("/owner/user/role", {
+            method:"POST",
+            body: JSON.stringify({ rollNumber: roll })
+          });
+          setLoading(false);
+          if(!data.success) return msg(data.message, "Error");
+          await loadUsersForAdmin();
+        }
+
+        if(action === "unlock"){
+          setLoading(true);
+          const data = await apiFetch("/owner/user/unlock-actions", {
+            method:"POST",
+            body: JSON.stringify({ rollNumber: roll })
+          });
+          setLoading(false);
+          if(!data.success) return msg(data.message, "Error");
+          await loadUsersForAdmin();
+        }
+
+        if(action === "lock"){
+          setLoading(true);
+          const data = await apiFetch("/owner/user/lock-actions", {
+            method:"POST",
+            body: JSON.stringify({ rollNumber: roll })
+          });
+          setLoading(false);
+          if(!data.success) return msg(data.message, "Error");
+          await loadUsersForAdmin();
+        }
+      });
+    });
+  }
+
   navItems.forEach(btn => {
     btn.addEventListener("click", async () => {
       const page = btn.dataset.page;
       openPage(page);
 
       const user = getUser();
-      if(!user) return;
+      if (!user) return;
 
-      if(page === "attendancePage"){
-        if(user.role === "student"){
-          await loadStudentAttendance();
-        } else {
+      if (page === "attendancePage") {
+        if (user.role === "student") await loadStudentAttendance();
+        else {
           const d = document.getElementById("adminAttendanceDate");
-          if(!d.value) d.value = new Date().toISOString().split("T")[0];
+          if (d && !d.value) d.value = new Date().toISOString().split("T")[0];
           await loadAdminAttendanceButtons();
         }
       }
 
-      if(page === "marksPage"){
+      if (page === "resultsPage") {
         await loadResults("internal");
+        await loadCGPA();
       }
 
-      if(page === "profilePage"){
+      if (page === "profilePage") {
         loadProfileUI();
       }
 
-      if(page === "adminUsersPage"){
+      if (page === "adminUsersPage") {
         await loadUsersForAdmin();
       }
 
+      if (page === "adminSetupPage") {
+        await loadSubjects();
+      }
+
       await refreshStats();
-      await loadCGPA();
     });
   });
 
-  // ======================
-  // App loader
-  // ======================
-  async function loadApp(){
+  async function loadApp() {
     const token = getToken();
 
-    if(!token){
+    if (!token) {
       authSection.classList.remove("hidden");
       homeSection.classList.add("hidden");
       return;
@@ -724,7 +722,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const me = await apiFetch("/me");
     setLoading(false);
 
-    if(!me.success){
+    if (!me.success) {
       clearToken();
       clearUser();
       authSection.classList.remove("hidden");
@@ -736,12 +734,12 @@ document.addEventListener("DOMContentLoaded", () => {
     authSection.classList.add("hidden");
     homeSection.classList.remove("hidden");
     refreshHeader();
+    applyLocksUI();
 
-    if(me.user.role === "owner" || me.user.role === "staff"){
+    if (me.user.role === "owner" || me.user.role === "staff") {
       adminNavBlock.classList.remove("hidden");
       adminOnly.forEach(x => x.classList.remove("hidden"));
       studentOnly.forEach(x => x.classList.add("hidden"));
-
       await loadUsersForAdmin();
     } else {
       adminNavBlock.classList.add("hidden");
@@ -752,8 +750,6 @@ document.addEventListener("DOMContentLoaded", () => {
     await loadClasses();
     await loadSubjects();
     await refreshStats();
-    await loadCGPA();
-
     openPage("dashboardPage");
   }
 
