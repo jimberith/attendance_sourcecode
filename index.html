@@ -172,13 +172,6 @@
           </div>
 
           <div id="adminAttendanceButtons" class="student-grid"></div>
-
-          <div class="legend">
-            <span class="legend-pill present">Present</span>
-            <span class="legend-pill absent">Absent</span>
-            <span class="legend-pill od">O/D</span>
-            <span class="legend-pill leave">Leave</span>
-          </div>
         </div>
       </section>
 
@@ -200,28 +193,6 @@
           <button class="btn btn-alt" id="downloadPdfBtn" style="margin-top:12px;">
             📄 Download PDF Marksheet
           </button>
-        </div>
-
-        <!-- ADMIN MARKS -->
-        <div class="card fancy-card admin-only hidden" id="adminMarksCard">
-          <h3>Update Marks (Admin)</h3>
-
-          <label class="tiny-label">Class</label>
-          <select id="marksClassSelect"></select>
-
-          <label class="tiny-label">Student</label>
-          <select id="marksStudentSelect"></select>
-
-          <label class="tiny-label">Subject</label>
-          <select id="subjectSelect"></select>
-
-          <div class="grid-3">
-            <input type="number" id="internalMarks" placeholder="Internal (0-30)" />
-            <input type="number" id="assessmentMarks" placeholder="Assessment (0-20)" />
-            <input type="number" id="examMarks" placeholder="Exam (0-50)" />
-          </div>
-
-          <button class="btn btn-main" id="saveMarksBtn">Save Marks</button>
         </div>
       </section>
 
@@ -269,6 +240,15 @@
               <textarea id="addressInput" placeholder="Address"></textarea>
 
               <button class="btn btn-main" id="saveProfileBtn">Update Profile</button>
+
+              <!-- ✅ FACE REGISTRATION BUTTON -->
+              <button class="btn btn-alt" id="registerFaceBtn">
+                📷 Register Face (ESP32 Attendance)
+              </button>
+
+              <div class="box" style="margin-top:10px;" id="faceStatusBox">
+                Face registration status: <b id="faceStatusText">Not Registered</b>
+              </div>
             </div>
 
             <div class="profile-block">
@@ -282,8 +262,7 @@
       <!-- ADMIN USERS -->
       <section class="page hidden" id="adminUsersPage">
         <div class="card fancy-card">
-          <h3>👥 Users Control (Owner)</h3>
-
+          <h3>👥 Users Control</h3>
           <div class="grid-2" style="margin-top:8px;">
             <input type="text" id="userSearch" placeholder="Search by name / roll / class"/>
             <select id="roleFilter">
